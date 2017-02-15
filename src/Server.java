@@ -1,6 +1,4 @@
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -11,12 +9,26 @@ public class Server {
     public static void main(String[] args) {
         ServerSocket serverSocket = null;
         try {
-            serverSocket = new ServerSocket(2500); // поднимаем сервер
-            Socket socket = serverSocket.accept();//accept - возвращает экземпляр клиента, который подключился к серверу
-            InputStream soccetInputStream = socket.getInputStream(); // байтовый поток
-            DataInputStream dataInputStream = new DataInputStream(soccetInputStream);
-            String message = dataInputStream.readUTF();
-            System.out.println(message);
+            serverSocket = new ServerSocket(2500);
+            Socket socket = serverSocket.accept();
+            InputStream socketInputStream = socket.getInputStream();
+            OutputStream socketOutputStream = socket.getOutputStream();// байтовый поток
+            DataInputStream dataInputStream = new DataInputStream(socketInputStream);
+            DataOutputStream dataOutputStream = new DataOutputStream(socketOutputStream);
+            while (true) {
+                String message = dataInputStream.readUTF();
+                if (message.endsWith("exit")) {
+                    dataOutputStream.writeUTF("Server: Connection close");
+                    dataOutputStream.flush();
+                    socket.close();
+                    System.out.println("Client: Connection close");
+                    break;
+                } else {
+                    dataOutputStream.writeUTF("Server: Message \"" + message + "\" was delivered");
+                    dataOutputStream.flush();
+                    System.out.println("Client: The received message is " + "\"" + message + "\"");
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

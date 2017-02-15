@@ -1,6 +1,4 @@
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 
 /**
@@ -9,11 +7,26 @@ import java.net.Socket;
 public class Client {
     public static void main(String[] args) {
         try {
-            Socket socket = new Socket("localhost",2500); // подключение к серверу
-            OutputStream socketOutputStream = socket.getOutputStream();
+            InputStreamReader isr = new InputStreamReader(System.in);
+            BufferedReader keyboard = new BufferedReader(isr);
+            Socket socket = new Socket("localhost", 2500);
+            InputStream socketInputStream = socket.getInputStream();
+            OutputStream socketOutputStream = socket.getOutputStream();// байтовый поток
+            DataInputStream dataInputStream = new DataInputStream(socketInputStream);
             DataOutputStream dataOutputStream = new DataOutputStream(socketOutputStream);
-            dataOutputStream.writeUTF("Hello ");
-            System.out.println("ok");
+            while (true) {
+                String message = keyboard.readLine();
+                dataOutputStream.writeUTF(message);
+                dataOutputStream.flush();
+                String answer = dataInputStream.readUTF();
+                if (answer.endsWith("Server: Connection close")) {
+
+                    System.out.println(answer);
+                    break;
+                } else {
+                    System.out.println(answer);
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
