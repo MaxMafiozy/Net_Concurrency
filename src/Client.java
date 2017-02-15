@@ -23,7 +23,8 @@ public class Client {
 
                     System.out.println(answer);
                     break;
-                } else {
+                } else
+                    {
                     System.out.println(answer);
                 }
             }

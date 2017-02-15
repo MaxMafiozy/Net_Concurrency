@@ -23,7 +23,8 @@ public class Server {
                     socket.close();
                     System.out.println("Client: Connection close");
                     break;
-                } else {
+                } else
+                    {
                     dataOutputStream.writeUTF("Server: Message \"" + message + "\" was delivered");
                     dataOutputStream.flush();
                     System.out.println("Client: The received message is " + "\"" + message + "\"");
