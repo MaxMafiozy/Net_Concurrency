@@ -9,7 +9,7 @@ public class Server {
     public static void main(String[] args) {
         ServerSocket serverSocket = null;
         try {
-            serverSocket = new ServerSocket(2500);
+            serverSocket = new ServerSocket(Integer.parseInt(args[0]));
             Socket socket = serverSocket.accept();
             InputStream socketInputStream = socket.getInputStream();
             OutputStream socketOutputStream = socket.getOutputStream();// байтовый поток

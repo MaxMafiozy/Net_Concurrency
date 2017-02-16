@@ -9,7 +9,7 @@ public class Client {
         try {
             InputStreamReader isr = new InputStreamReader(System.in);
             BufferedReader keyboard = new BufferedReader(isr);
-            Socket socket = new Socket("localhost", 2500);
+            Socket socket = new Socket(args[0], Integer.parseInt(args[1]));
             InputStream socketInputStream = socket.getInputStream();
             OutputStream socketOutputStream = socket.getOutputStream();// байтовый поток
             DataInputStream dataInputStream = new DataInputStream(socketInputStream);
