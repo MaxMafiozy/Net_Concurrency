@@ -7,28 +7,15 @@ import java.net.Socket;
  */
 public class Server {
     public static void main(String[] args) {
+
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(Integer.parseInt(args[0]));
-            Socket socket = serverSocket.accept();
-            InputStream socketInputStream = socket.getInputStream();
-            OutputStream socketOutputStream = socket.getOutputStream();// байтовый поток
-            DataInputStream dataInputStream = new DataInputStream(socketInputStream);
-            DataOutputStream dataOutputStream = new DataOutputStream(socketOutputStream);
+            System.out.println("Server: Server started");
             while (true) {
-                String message = dataInputStream.readUTF();
-                if (message.endsWith("exit")) {
-                    dataOutputStream.writeUTF("Server: Connection close");
-                    dataOutputStream.flush();
-                    socket.close();
-                    System.out.println("Client: Connection close");
-                    break;
-                } else
-                    {
-                    dataOutputStream.writeUTF("Server: Message \"" + message + "\" was delivered");
-                    dataOutputStream.flush();
-                    System.out.println("Client: The received message is " + "\"" + message + "\"");
-                }
+                Socket socket = serverSocket.accept();
+                Thread thread = new Thread(new Session(socket));
+                thread.start();
             }
         } catch (IOException e) {
             e.printStackTrace();

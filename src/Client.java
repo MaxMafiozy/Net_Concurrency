@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Сергеев on 13.02.2017.
@@ -15,18 +16,17 @@ public class Client {
             DataInputStream dataInputStream = new DataInputStream(socketInputStream);
             DataOutputStream dataOutputStream = new DataOutputStream(socketOutputStream);
             while (true) {
-                String message = keyboard.readLine();
-                dataOutputStream.writeUTF(message);
-                dataOutputStream.flush();
                 String answer = dataInputStream.readUTF();
                 if (answer.endsWith("Server: Connection close")) {
 
                     System.out.println(answer);
                     break;
-                } else
-                    {
+                } else {
                     System.out.println(answer);
                 }
+                String message = keyboard.readLine();
+                dataOutputStream.writeUTF(message);
+                dataOutputStream.flush();
             }
         } catch (IOException e) {
             e.printStackTrace();
