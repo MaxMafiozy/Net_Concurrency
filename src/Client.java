@@ -39,10 +39,7 @@ public class Client {
             while (true) {
                 try {
                     answer = dataInputStream.readUTF();
-                } catch (SocketException e) {
-                    System.out.println("Connection lost");
-                    return;
-                }
+
                 if (answer.endsWith("Server: Connection close")) {
 
                     System.out.println(answer);
@@ -53,6 +50,10 @@ public class Client {
                 String message = keyboard.readLine();
                 dataOutputStream.writeUTF(message);
                 dataOutputStream.flush();
+                } catch (SocketException e) {
+                    System.out.println("Connection lost");
+                    return;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
