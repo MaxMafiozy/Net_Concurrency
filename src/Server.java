@@ -8,11 +8,12 @@ import java.net.Socket;
  */
 public class Server {
     public static int sessionCount = 0;//start count users
-
+    static final Object lock =new Object();
     public static void main(String[] args) {
+
         int maxSessionCount;
         int port;
-        try {
+
             try {
                 maxSessionCount = Integer.parseInt(args[1]);//max users (default 2)
             } catch (NumberFormatException ex) {
@@ -26,35 +27,62 @@ public class Server {
                 return;
             }
             ServerSocket serverSocket = null;
-            try {
-                serverSocket = new ServerSocket(port);
-            } catch (BindException e) {
-                System.out.println("Server: port " + port + " is alredy used");
-                return;
-            }
-            System.out.println("Server: Server started");
-            while (true) {
-                Socket socket = serverSocket.accept();
-                if (sessionCount < maxSessionCount) {
-                    sessionCount++;
-                    System.out.println("Count of connected users: " + sessionCount);
-                    Thread thread = new Thread(new Session(socket));
-                    thread.start();
-                } else {
-                    OutputStream socketOutputStream = socket.getOutputStream();// байтовый поток
-                    DataOutputStream dataOutputStream = new DataOutputStream(socketOutputStream);
-                    dataOutputStream.writeUTF("Server: Server is full\nServer: Connection close");
-                    dataOutputStream.flush();
-                }
-            }
+        try {
+            serverSocket = new ServerSocket(port);
+        } catch (BindException e) {
+            System.out.println("Server: port " + port + " is alredy used");
+            return;
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        System.out.println("Server: Server started");
+        while (true) {
+            try {
+
+            Socket socket = serverSocket.accept();
+
+
+                try {
+
+                   // dataOutputStream.writeUTF("Server: Wait connection");
+
+                    synchronized (lock) {
+                        if (sessionCount >= maxSessionCount) {
+                            lock.wait();
+                        }
+                        OutputStream socketOutputStream = socket.getOutputStream();// байтовый поток
+                        DataOutputStream dataOutputStream = new DataOutputStream(socketOutputStream);
+                        dataOutputStream.writeUTF("Server: Connection confirmed");
+                        dataOutputStream.flush();
+                        openSession();
+                        Thread thread = new Thread(new Session(socket));
+                        thread.start();
+                    }
+            }
+                catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public static void closeSession() {
-        sessionCount--;
-        System.out.println("Count of connected users: " + sessionCount);
+        synchronized(lock){
+            sessionCount--;
+            System.out.println("Count of connected users: " + sessionCount);
+            lock.notifyAll();
+        }
+    }
+    public static  void openSession() {
+        synchronized(lock){
+            sessionCount++;
+            System.out.println("Count of connected users: " + sessionCount);
+        }
     }
 
 }

@@ -15,7 +15,6 @@ public class Session implements Runnable {
             DataInputStream dataInputStream = new DataInputStream(socketInputStream);
             OutputStream socketOutputStream = socket.getOutputStream();
             DataOutputStream dataOutputStream = new DataOutputStream(socketOutputStream);
-            dataOutputStream.writeUTF("Server: Connection confrimed");
             dataOutputStream.flush();
             while (true) {
                 String message = dataInputStream.readUTF();
