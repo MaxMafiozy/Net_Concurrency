@@ -6,7 +6,7 @@ import java.net.Socket;
  */
 public class Session implements Runnable {
     Socket socket;
-
+    Server server;
 
     @Override
     public void run() {
@@ -33,12 +33,13 @@ public class Session implements Runnable {
         } catch (IOException e) {
             System.out.println("Client " + socket + ": Connection close");
         } finally {
-            Server.closeSession();
+            server.closeSession();
         }
     }
 
-    Session(Socket socket) {
+    public  Session(Socket socket,Server server) {
         this.socket = socket;
+        this.server = server;
     }
 
 }

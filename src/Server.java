@@ -6,62 +6,72 @@ import java.net.Socket;
 /**
  * Created by Сергеев on 13.02.2017.
  */
-public class Server {
-    public static int sessionCount = 0;//start count users
-    static final Object lock =new Object();
-    public static void main(String[] args) {
+public class Server implements Runnable {
+    public volatile  int sessionCount = 0;//start count users
+    private volatile int maxSessionCount;
+    static  Object lock =new Object();
+    private int port;
+    private ServerSocket serverSocket;
 
-        int maxSessionCount;
-        int port;
+    public Server (ServerSocket serverSocket, int port, int maxSessionCount){
+                this.serverSocket = serverSocket;
+                this.port = port;
+              this.maxSessionCount = maxSessionCount;
+    }
 
-            try {
-                maxSessionCount = Integer.parseInt(args[1]);//max users (default 2)
-            } catch (NumberFormatException ex) {
-                System.out.println("Wrong maxSessionCount format. Should be integer");
-                return;
-            }
-            try {
-                port = Integer.parseInt(args[0]);
-            } catch (NumberFormatException ex) {
-                System.out.println("Wrong port format. Should be integer");
-                return;
-            }
-            ServerSocket serverSocket = null;
-        try {
-            serverSocket = new ServerSocket(port);
-        } catch (BindException e) {
-            System.out.println("Server: port " + port + " is alredy used");
-            return;
-        } catch (IOException e) {
-            e.printStackTrace();
+
+
+    public  void closeSession() {
+        synchronized(lock){
+            sessionCount--;
+            System.out.println("Count of connected users: " + sessionCount);
+            lock.notifyAll();
         }
+    }
+    public   void openSession() {
+        synchronized(lock){
+            sessionCount++;
+            System.out.println("Count of connected users: " + sessionCount);
+        }
+    }
+    public void run() {
         System.out.println("Server: Server started");
+        Channel channel=new Channel(maxSessionCount);
+        PA pa=new PA(channel);
         while (true) {
             try {
 
-            Socket socket = serverSocket.accept();
+                Socket socket = serverSocket.accept();
 
 
-                try {
 
-                   // dataOutputStream.writeUTF("Server: Wait connection");
 
-                    synchronized (lock) {
-                        if (sessionCount >= maxSessionCount) {
+
+
+                synchronized (lock) {
+                    while (sessionCount == maxSessionCount) {
+                        try {
                             lock.wait();
                         }
-                        OutputStream socketOutputStream = socket.getOutputStream();// байтовый поток
-                        DataOutputStream dataOutputStream = new DataOutputStream(socketOutputStream);
-                        dataOutputStream.writeUTF("Server: Connection confirmed");
-                        dataOutputStream.flush();
-                        openSession();
-                        Thread thread = new Thread(new Session(socket));
-                        thread.start();
+                        catch (InterruptedException e) {
+                            System.out.println("Some errors");
+                        }
                     }
-            }
-                catch (InterruptedException e) {
-                    e.printStackTrace();
+
+                    OutputStream socketOutputStream = socket.getOutputStream();// байтовый поток
+                    DataOutputStream dataOutputStream = new DataOutputStream(socketOutputStream);
+                    dataOutputStream.writeUTF("Server: Connection confirmed");
+                    Session session=new Session(socket, Server.this);
+
+                    channel.put(session);
+                    Thread thread = new Thread(pa);
+                    thread.start();
+                    dataOutputStream.flush();
+
+                    openSession();
+
                 }
+
 
 
             }
@@ -70,19 +80,4 @@ public class Server {
             }
         }
     }
-
-    public static void closeSession() {
-        synchronized(lock){
-            sessionCount--;
-            System.out.println("Count of connected users: " + sessionCount);
-            lock.notifyAll();
-        }
-    }
-    public static  void openSession() {
-        synchronized(lock){
-            sessionCount++;
-            System.out.println("Count of connected users: " + sessionCount);
-        }
-    }
-
 }
