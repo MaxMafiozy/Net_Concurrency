@@ -1,3 +1,5 @@
+package app;
+
 import java.io.*;
 import java.net.*;
 import java.util.concurrent.TimeUnit;
@@ -40,16 +42,16 @@ public class Client {
                 try {
                     answer = dataInputStream.readUTF();
 
-                if (answer.endsWith("Server: Connection close")) {
+                    if (answer.endsWith("app.Server: Connection close")) {
 
-                    System.out.println(answer);
-                    break;
-                } else {
-                    System.out.println(answer);
-                }
-                String message = keyboard.readLine();
-                dataOutputStream.writeUTF(message);
-                dataOutputStream.flush();
+                        System.out.println(answer);
+                        break;
+                    } else {
+                        System.out.println(answer);
+                    }
+                    String message = keyboard.readLine();
+                    dataOutputStream.writeUTF(message);
+                    dataOutputStream.flush();
                 } catch (SocketException e) {
                     System.out.println("Connection lost");
                     return;

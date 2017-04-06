@@ -1,3 +1,7 @@
+package concurrent_utils;
+
+import netUtils.Session;
+
 import java.util.LinkedList;
 
 /**
@@ -22,12 +26,7 @@ public class Channel {
         }
     }
 
-    public Channel(int maxCount) {
-        this.maxCount = maxCount;
-    }
-
-
-    public void put(Session session) {
+    public void put(Runnable session) {
         synchronized (lock) {
             while (maxCount <= linkedList.size()) {
                 try {
@@ -36,11 +35,23 @@ public class Channel {
                     e.printStackTrace();
                 }
             }
-
             linkedList.addLast(session);
             lock.notifyAll();
         }
     }
+public int size()
+
+
+    {
+        synchronized (lock)
+        {
+            return linkedList.size();
+        }
+    }
+    public Channel(int maxCount) {
+        this.maxCount = maxCount;
+    }
+
+
 }
-//queue.addLast();
-//queue.removeFirst();
+

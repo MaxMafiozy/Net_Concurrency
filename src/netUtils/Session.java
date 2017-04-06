@@ -1,5 +1,10 @@
+package netUtils;
+
+import app.Server;
+
 import java.io.*;
 import java.net.Socket;
+
 
 /**
  * Created by Сергеев on 17.02.2017.
@@ -19,25 +24,25 @@ public class Session implements Runnable {
             while (true) {
                 String message = dataInputStream.readUTF();
                 if (message.endsWith("exit")) {
-                    dataOutputStream.writeUTF("Server: Connection close");
+                    dataOutputStream.writeUTF("app.Server: Connection close");
                     dataOutputStream.flush();
-                    System.out.println("Client " + socket + ": Connection close");
+                    System.out.println("app.Client " + socket + ": Connection close");
                     break;
                 } else {
-                    dataOutputStream.writeUTF("Server: Message \"" + message + "\" was delivered");
+                    dataOutputStream.writeUTF("app.Server: Message \"" + message + "\" was delivered");
                     dataOutputStream.flush();
-                    System.out.println("Client " + socket + ": The received message is " + "\"" + message + "\"");
+                    System.out.println("app.Client " + socket + ": The received message is " + "\"" + message + "\"");
                 }
             }
             socket.close();
         } catch (IOException e) {
-            System.out.println("Client " + socket + ": Connection close");
+            System.out.println("app.Client " + socket + ": Connection close");
         } finally {
             server.closeSession();
         }
     }
 
-    public  Session(Socket socket,Server server) {
+    public  Session(Socket socket, Server server) {
         this.socket = socket;
         this.server = server;
     }

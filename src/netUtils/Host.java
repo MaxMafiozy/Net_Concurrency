@@ -1,3 +1,5 @@
+package netUtils;
+import app.Server;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.ServerSocket;
@@ -7,8 +9,7 @@ import java.net.ServerSocket;
  */
 public class Host {
     public static void main(String[] args) {
-int  maxSessionCount,port;
-
+        int maxSessionCount, port;
         try {
             maxSessionCount = Integer.parseInt(args[1]);//max users (default 2)
         } catch (NumberFormatException ex) {
@@ -25,7 +26,7 @@ int  maxSessionCount,port;
         try {
             serverSocket = new ServerSocket(port);
         } catch (BindException e) {
-            System.out.println("Server: port " + port + " is alredy used");
+            System.out.println("app.Server: port " + port + " is alredy used");
             return;
         } catch (IOException e) {
             e.printStackTrace();
