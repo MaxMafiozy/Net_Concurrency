@@ -1,18 +1,18 @@
 package concurrent_utils;
 
-import netUtils.Session;
+import netUtils.Stoppable;
 
 import java.util.LinkedList;
 
 /**
  * Created by Сергеев on 17.03.2017.
  */
-public class Channel {
-    private int maxCount;
-    static final Object lock = new Object();
-    private final LinkedList<Runnable> linkedList = new LinkedList();
+public class Channel<T> {
+    private final int maxCount;
+    private final static Object lock = new Object();
+    private final LinkedList<T> linkedList = new LinkedList<>();
 
-    Runnable take() {
+    public  T take() {
         synchronized (lock) {
             while (linkedList.isEmpty()) {
                 try {
@@ -21,36 +21,38 @@ public class Channel {
                     e.printStackTrace();
                 }
             }
+
             lock.notifyAll();
-            return linkedList.removeFirst();
+            return (T) linkedList.removeFirst();
         }
     }
 
-    public void put(Runnable session) {
+    public void put(T x) {
         synchronized (lock) {
-            while (maxCount <= linkedList.size()) {
+            while (maxCount == linkedList.size()) {
                 try {
                     lock.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            linkedList.addLast(session);
+            linkedList.addLast((T) x);
             lock.notifyAll();
         }
     }
-public int size()
 
 
-    {
-        synchronized (lock)
-        {
+    int size() {
+        synchronized (lock) {
             return linkedList.size();
         }
     }
+
     public Channel(int maxCount) {
         this.maxCount = maxCount;
+
     }
+
 
 
 }

@@ -1,20 +1,19 @@
 package concurrent_utils;
-
-import concurrent_utils.ThreadPool;
-import javafx.concurrent.Task;
-
+import netUtils.Stoppable;
 /**
  * Created by Сергеев on 24.03.2017.
  */
 public class WorkerThread implements Runnable {
-    Thread thread;
-    ThreadPool threadPool;
-    Runnable currentTask = null;
+    private Thread thread;
+    private ThreadPool threadPool;
+    private Stoppable currentTask;
+    private volatile boolean isActive;
     private final Object lock = new Object();
-    public void run(){
+
+    public void run() {
         synchronized (lock) {
 
-        while (true){
+            while (isActive) {
 
                 while (currentTask == null) {
                     try {
@@ -22,32 +21,42 @@ public class WorkerThread implements Runnable {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                }
                 try {
                     currentTask.run();
-                }
-                catch (RuntimeException e){
+                } catch (RuntimeException e) {
                     e.printStackTrace();
-                }
-                finally {
-                    currentTask=null;
+                } finally {
+                    currentTask = null;
                     threadPool.onTaskCompleted(this);
                 }
-                }
-
+            }
         }
     }
-        }
+
     public WorkerThread(ThreadPool threadPool) {
-        thread=new Thread(this);
-        this.threadPool=threadPool;
+        thread = new Thread(this);
+        this.threadPool = threadPool;
+        this.isActive = true;
         thread.start();
     }
 
+    public void stop() {
+        isActive = false;
+        thread.interrupt();
+        if (currentTask != null){
+             currentTask.stop();
+        }
+    }
 
-    public void execute(Runnable task){
+    public void execute(Stoppable task) {
         synchronized (lock) {
-           currentTask=task;
+            if (currentTask != null) {
+                new IllegalStateException();
+            }
+            currentTask = task;
             lock.notifyAll();
+
         }
 
     }

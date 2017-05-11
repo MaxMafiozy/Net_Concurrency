@@ -42,10 +42,11 @@ public class Client {
                 try {
                     answer = dataInputStream.readUTF();
 
-                    if (answer.endsWith("app.Server: Connection close")) {
+                    if (answer.endsWith("Server: Connection close")) {
 
                         System.out.println(answer);
                         break;
+
                     } else {
                         System.out.println(answer);
                     }
