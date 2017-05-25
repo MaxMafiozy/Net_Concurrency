@@ -3,11 +3,13 @@ package netUtils;
 import app.Server;
 import concurrent_utils.Channel;
 import concurrent_utils.PA;
+import concurrent_utils.SocketList;
 import concurrent_utils.ThreadPool;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -26,7 +28,7 @@ public class Host implements Stoppable  {
     private Thread thread;
     public int maxSessionCount;
     private volatile boolean isActive;
-
+    SocketList socketList;
     public void closeSession() {
         synchronized (lock) {
             sessionCount--;
@@ -54,8 +56,11 @@ public class Host implements Stoppable  {
                 System.out.println("Server: Host stopped");
             }
             MessageHandler messageHandler = messageHandlerFactory.create();
-            Session session = new Session(socket, messageHandler, this);
+            Session session = new Session(socket, messageHandler, this, socketList);
+            socketList.put(socket);
             channel.put(session);
+
+
     }
 
 
@@ -79,7 +84,7 @@ public class Host implements Stoppable  {
             }
 
     }
-    public Host(int port, Channel <Stoppable> channel , MessageHandlerFactory messageHandlerFactory, int maxSessionCount) {
+    public Host(int port, Channel <Stoppable> channel , MessageHandlerFactory messageHandlerFactory, int maxSessionCount, SocketList socketList) {
         try {
             this.serverSocket = new ServerSocket(port);
         } catch (IOException e) {
@@ -88,6 +93,7 @@ public class Host implements Stoppable  {
         this.channel = channel;
         this.messageHandlerFactory = messageHandlerFactory;
         this.maxSessionCount=maxSessionCount;
+        this.socketList=socketList;
         isActive = true;
     }
 }

@@ -2,6 +2,7 @@ package app;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
 
@@ -25,7 +26,9 @@ public class Client {
             }
             try {
                 try {
+
                     socket = new Socket(host, port);
+                    
                 } catch (ConnectException e) {
                     System.out.println("Can't connection to this port for this host. This port is wrong");
                     return;
@@ -34,28 +37,48 @@ public class Client {
                 System.out.println("Can't connection to this host. May be host format is wrong or not available");
                 return;
             }
+
             InputStream socketInputStream = socket.getInputStream();
-            OutputStream socketOutputStream = socket.getOutputStream();// байтовый поток
+            OutputStream socketOutputStream = socket.getOutputStream();
+
             DataInputStream dataInputStream = new DataInputStream(socketInputStream);
             DataOutputStream dataOutputStream = new DataOutputStream(socketOutputStream);
+            Thread myThready = new Thread(new Runnable()
+            {
+                public void run() //Этот метод будет выполняться в побочном потоке
+                {
+                    System.out.println("Привет из побочного потока!");
+                    while (true) {
+                        try {
+                            String answer = dataInputStream.readUTF();
+
+                            if (answer.endsWith("Server: Connection close")) {
+
+                                System.out.println(answer);
+
+                            } else {
+                                System.out.println(answer);
+                            }
+                        } catch (SocketException e) {
+                            System.out.println("Connection lost");
+                            System.exit(0);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+
+            myThready.start();
             while (true) {
                 try {
-                    answer = dataInputStream.readUTF();
 
-                    if (answer.endsWith("Server: Connection close")) {
-
-                        System.out.println(answer);
-                        break;
-
-                    } else {
-                        System.out.println(answer);
-                    }
                     String message = keyboard.readLine();
                     dataOutputStream.writeUTF(message);
                     dataOutputStream.flush();
                 } catch (SocketException e) {
                     System.out.println("Connection lost");
-                    return;
+                    System.exit(0);
                 }
             }
         } catch (IOException e) {

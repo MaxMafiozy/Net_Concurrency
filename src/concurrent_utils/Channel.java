@@ -2,6 +2,7 @@ package concurrent_utils;
 
 import netUtils.Stoppable;
 
+import java.net.Socket;
 import java.util.LinkedList;
 
 /**
@@ -42,7 +43,7 @@ public class Channel<T> {
     }
 
 
-    int size() {
+    public int size() {
         synchronized (lock) {
             return linkedList.size();
         }

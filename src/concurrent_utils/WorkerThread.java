@@ -19,7 +19,9 @@ public class WorkerThread implements Runnable {
                     try {
                         lock.wait();
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        if(!isActive){
+                            return;
+                        }
                     }
                 }
                 try {

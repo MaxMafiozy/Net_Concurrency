@@ -3,10 +3,13 @@ package app;
 
 import concurrent_utils.Channel;
 import concurrent_utils.PA;
+import concurrent_utils.SocketList;
 import concurrent_utils.ThreadPool;
 import netUtils.Host;
 import netUtils.MessageHandlerFactory;
 import netUtils.Stoppable;
+
+import java.net.Socket;
 
 
 /**
@@ -24,7 +27,7 @@ public class Server  {
             return;
         }
         try {
-            port = Integer.parseInt(args[0]);
+            port = 2600;
         } catch (NumberFormatException ex) {
             System.out.println("Wrong port format. Should be integer");
             return;
@@ -42,7 +45,8 @@ public class Server  {
                       e.printStackTrace();
                 }
         Channel<Stoppable> channel = new Channel(maxSessionCount);
-        Host host = new Host(port, channel, messageHandlerFactory,maxSessionCount );
+        SocketList socketList=new SocketList(maxSessionCount);
+        Host host = new Host(port, channel, messageHandlerFactory,maxSessionCount, socketList)  ;
         host.start();
         ThreadPool threadPool = new ThreadPool(maxSessionCount);
         PA dispatcher = new PA(channel, threadPool);
