@@ -27,7 +27,7 @@ public class Server  {
             return;
         }
         try {
-            port = 6000;
+            port = Integer.parseInt(args[0]);
         } catch (NumberFormatException ex) {
             System.out.println("Wrong port format. Should be integer");
             return;
