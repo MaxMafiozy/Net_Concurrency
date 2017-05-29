@@ -12,6 +12,7 @@ import java.net.Socket;
  */
 public class Session implements Stoppable {
     MessageHandler messageHandler;
+    ChatMessageHandler chatmessageHandler;
     private Socket socket;
     Host host;
     SocketList socketList;
@@ -28,7 +29,7 @@ String name;
                 if(messagename.startsWith("[Name]")){
                     name=messagename.replace("[Name] ","");
                     socketList.putname(name);
-                    messageHandler.handle("[New User]", name,socket);
+                    chatmessageHandler.handle("[New User]", name,socket);
                 }
 
                 while (true) {
@@ -37,7 +38,8 @@ String name;
                         System.out.println("Client " + name + ": Connection close");
                         break;
                     } else {
-                        messageHandler.handle(message, name,socket);
+                        chatmessageHandler.handle(message, name,socket);
+                        messageHandler.handle(message);
                     }
                 }
 
@@ -49,17 +51,18 @@ String name;
         } finally {
             socketList.nametake(socketList.getname(name));
             socketList.take(socketList.getid(socket));
-            messageHandler.handle("[Delete User]",name,socket);
+            chatmessageHandler.handle("[Delete User]",name,socket);
             host.closeSession();
 
         }
     }
 
-    public Session(Socket socket, MessageHandler messageHandler, Host host, SocketList socketList) {
+    public Session(Socket socket, MessageHandler messageHandler, Host host, SocketList socketList, ChatMessageHandler chatmessageHandler) {
         this.socket = socket;
         this.messageHandler = messageHandler;
         this.host = host;
         this.socketList = socketList;
+        this.chatmessageHandler = chatmessageHandler;
     }
 
     @Override

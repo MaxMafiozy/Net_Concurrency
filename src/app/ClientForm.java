@@ -13,6 +13,8 @@ import java.net.UnknownHostException;
  * Created by Сергеев on 14.05.2017.
  */
 public class ClientForm {
+    private static String host;
+    private static int port;
     private JPanel panel1;
     private JTextField textField2;
     private JButton sendButton;
@@ -22,6 +24,8 @@ public class ClientForm {
     private JTextField textField1;
     Socket socket;
     String username;
+   
+
 
     public ClientForm() {
 
@@ -65,20 +69,9 @@ public class ClientForm {
     }
 
     Thread myThready2 = new Thread(new Runnable() {
-        public void run()
-        {
-            int port;
+        public void run() {
 
-            String answer;
             try {
-
-                String host = "localhost";
-                try {
-                    port = 2600;
-                } catch (NumberFormatException ex) {
-                    System.out.println("Wrong port format. Should be integer");
-                    return;
-                }
 
                 try {
                     try {
@@ -95,9 +88,9 @@ public class ClientForm {
 
                 try {
                     DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                    dataOutputStream.writeUTF("[Name] "+textField1.getText());
+                    dataOutputStream.writeUTF("[Name] " + textField1.getText());
                     dataOutputStream.flush();
-                    username=textField1.getText();
+                    username = textField1.getText();
                     textField1.setEditable(false);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -111,21 +104,19 @@ public class ClientForm {
                         while (true) {
                             try {
                                 String answer = dataInputStream.readUTF();
-                                    if(answer.endsWith("[New User]")){
+                                if (answer.endsWith("[New User]")) {
+                                    textArea2.setText("");
+                                    textArea2.append(answer.replace(": [New User]", "") + "\n");
+                                } else {
+                                    if (answer.endsWith("[Delete User]")) {
+                                        System.out.println("Delete");
                                         textArea2.setText("");
-                                        textArea2.append(answer.replace(": [New User]","")+"\n");
+                                        textArea2.append(answer.replace(": [Delete User]", "") + "\n");
+                                    } else {
+                                        textArea1.append(answer + "\n");
                                     }
-                                    else {
-                                        if(answer.endsWith("[Delete User]")){
-                                            System.out.println("Delete");
-                                            textArea2.setText("");
-                                            textArea2.append(answer.replace(": [Delete User]","")+"\n");
-                                        }
-                                        else {
-                                                textArea1.append(answer + "\n");
-                                        }
-                                    }
-                                } catch (IOException e) {
+                                }
+                            } catch (IOException e) {
                                 System.exit(0);
                                 break;
                             }
@@ -149,6 +140,13 @@ public class ClientForm {
         frame.setVisible(true);
         frame.setResizable(false);
         frame.setLocationRelativeTo(null);
+        host =  args[0];
+        try {
+            port = Integer.parseInt(args[1]);
+        } catch (NumberFormatException ex) {
+            System.out.println("Wrong port format. Should be integer");
+            return;
+        }
     }
 
 }

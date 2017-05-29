@@ -56,7 +56,8 @@ public class Host implements Stoppable  {
                 System.out.println("Server: Host stopped");
             }
             MessageHandler messageHandler = messageHandlerFactory.create();
-            Session session = new Session(socket, messageHandler, this, socketList);
+            ChatMessageHandler chatmessageHandler = messageHandlerFactory.createchat();
+            Session session = new Session(socket, messageHandler, this, socketList, chatmessageHandler);
             socketList.put(socket);
             channel.put(session);
 
